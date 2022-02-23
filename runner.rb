@@ -403,6 +403,16 @@ class Assertion < Struct.new(:src, :path, :lineno, :proc)
     end
     BT_STATE.error += 1
   end
+  
+   def show_error1(msg, additional_message)
+    msg = "#{BT.failed}\##{self.id} #{self.path}:#{self.lineno}#{BT.reset}: #{msg}  #{additional_message}"
+    if BT.tty
+      $stderr.puts "#{erase}#{msg}"
+    else
+      Assertion.errbuf << msg
+    end
+    BT_STATE.error += 1
+  end
 
 
   def show_progress(message = '')

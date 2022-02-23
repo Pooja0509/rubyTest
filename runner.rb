@@ -403,7 +403,18 @@ class Assertion < Struct.new(:src, :path, :lineno, :proc)
     end
     BT_STATE.error += 1
   end
-
+def assert_not_match1(unexpected_pattern, testsrc, message = '')
+  add_assertion testsrc, -> as do
+    as.assert_check(message) {|result|
+      if unexpected_pattern !~ result
+        nil
+      else
+        desc = "#{unexpected_pattern.inspect} expected to be !~\n#{result.inspect}"
+        pretty(testsrc, desc, result)
+      end
+    }
+  end
+end
 
   def show_progress(message = '')
     if BT.quiet || BT.wn > 1

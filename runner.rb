@@ -18,6 +18,8 @@ rescue LoadError
   retry
 end
 
+
+
 if !Dir.respond_to?(:mktmpdir)
   # copied from lib/tmpdir.rb
   def Dir.mktmpdir(prefix_suffix=nil, tmpdir=nil)
@@ -472,6 +474,28 @@ class Assertion < Struct.new(:src, :path, :lineno, :proc)
   end
 
   def get_result_string(opt = '', **argh)
+    if BT.ruby
+      filename = make_srcfile(**argh)
+      begin
+        kw = self.err ? {err: self.err} : {}
+        out = IO.popen("#{BT.ruby} -W0 #{opt} #{filename}", **kw)
+        pid = out.pid
+        out.read.tap{ Process.waitpid(pid); out.close }
+      ensure
+        raise Interrupt if $? and $?.signaled? && $?.termsig == Signal.list["INT"]
+
+        begin
+          Process.kill :KILL, pid
+        rescue Errno::ESRCH
+          # OK
+        end
+      end
+    else
+      eval(src).to_s
+    end
+  end
+  
+  def get_result_string1(opt = '', **argh)
     if BT.ruby
       filename = make_srcfile(**argh)
       begin

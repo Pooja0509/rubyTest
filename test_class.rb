@@ -20,7 +20,17 @@ assert_equal 'false',   %q( Object.__send__(:remove_const, :FalseClass)
 assert_equal 'nil',     %q( Object.__send__(:remove_const, :NilClass)
                             GC.start
                             nil.inspect)
-
+# inherited class
+assert_equal 'true',    %q( class A; end
+                            class C < A; end
+                            Object.const_defined?(:C) )
+assert_equal 'Class',   %q( class A; end
+                            class C < A; end
+                            C.class )
+assert_equal 'C',       %q( class A; end
+                            class C < A; end
+                            C.name )
+assert_equal 'C',       %q( class A; end
 
 # inherited class
 assert_equal 'true',    %q( class A; end
